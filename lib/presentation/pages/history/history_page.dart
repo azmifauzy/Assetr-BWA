@@ -2,6 +2,7 @@ import 'package:assetr/config/app_colors.dart';
 import 'package:assetr/config/app_formats.dart';
 import 'package:assetr/data/models/history.dart';
 import 'package:assetr/data/sources/source_history.dart';
+import 'package:assetr/presentation/controllers/HistoryController.dart';
 import 'package:assetr/presentation/controllers/IncomeOutcomeController.dart';
 import 'package:assetr/presentation/controllers/UserController.dart';
 import 'package:assetr/presentation/pages/history/detail_history_page.dart';
@@ -14,40 +15,31 @@ import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
-class IncomeOutcomePage extends StatefulWidget {
-  const IncomeOutcomePage({super.key, required this.type});
-  final String type;
+class HistoryPage extends StatefulWidget {
+  const HistoryPage({super.key});
 
   @override
-  State<IncomeOutcomePage> createState() => _IncomeOutcomePageState();
+  State<HistoryPage> createState() => _HistoryPageState();
 }
 
-class _IncomeOutcomePageState extends State<IncomeOutcomePage> {
-  final inoutController = Get.put(IncomeOutcomeController());
+class _HistoryPageState extends State<HistoryPage> {
+  final historyController = Get.put(HistoryController());
   final user = Get.put(UserController());
   final controllerSearch = TextEditingController();
 
   refresh() {
-    inoutController.getList(user.data.id.toString(), widget.type);
+    historyController.getList(user.data.id.toString());
   }
 
-  menuOption(String value, History history) async {
-    if (value == 'update') {
-      Get.to(() => UpdateHistoryPage(id: history.id))?.then((value) {
-        if (value ?? false) {
-          refresh();
-        }
-      });
-    } else if (value == 'delete') {
-      bool? isDelete = await DInfo.dialogConfirmation(
-          context, 'Hapus', 'Yakin ingin menghapus data?',
-          textNo: 'Batal', textYes: 'Ya');
+  delete(History history) async {
+    bool? isDelete = await DInfo.dialogConfirmation(
+        context, 'Hapus', 'Yakin ingin menghapus data?',
+        textNo: 'Batal', textYes: 'Ya');
 
-      if (isDelete!) {
-        bool success = await SourceHistory.delete(history.id.toString());
-        if (success) {
-          refresh();
-        }
+    if (isDelete!) {
+      bool success = await SourceHistory.delete(history.id.toString());
+      if (success) {
+        refresh();
       }
     }
   }
@@ -65,7 +57,7 @@ class _IncomeOutcomePageState extends State<IncomeOutcomePage> {
         titleSpacing: 0,
         title: Row(
           children: [
-            Text(widget.type),
+            Text("Riwayat"),
             Expanded(
                 child: Container(
               height: 40,
@@ -94,8 +86,8 @@ class _IncomeOutcomePageState extends State<IncomeOutcomePage> {
                     hintStyle: const TextStyle(color: Colors.white),
                     suffixIcon: IconButton(
                       onPressed: () {
-                        inoutController.search(user.data.id.toString(),
-                            widget.type, controllerSearch.text);
+                        historyController.historySearch(
+                            user.data.id.toString(), controllerSearch.text);
                       },
                       icon: const Icon(
                         Icons.search,
@@ -110,7 +102,7 @@ class _IncomeOutcomePageState extends State<IncomeOutcomePage> {
           ],
         ),
       ),
-      body: GetBuilder<IncomeOutcomeController>(builder: (_) {
+      body: GetBuilder<HistoryController>(builder: (_) {
         if (_.loading) return DView.loadingCircle();
         if (_.list.isEmpty) return DView.empty('Kosong');
         return RefreshIndicator(
@@ -124,7 +116,6 @@ class _IncomeOutcomePageState extends State<IncomeOutcomePage> {
                 margin: EdgeInsets.fromLTRB(16, index == 0 ? 16 : 8, 16,
                     index == _.list.length ? 16 : 8),
                 child: InkWell(
-                  borderRadius: BorderRadius.circular(4),
                   onTap: () {
                     Get.to(() => DetailHistoryPage(
                           userId: user.data.id.toString(),
@@ -133,6 +124,16 @@ class _IncomeOutcomePageState extends State<IncomeOutcomePage> {
                   },
                   child: Row(
                     children: [
+                      DView.spaceWidth(),
+                      history.type == "Pemasukan"
+                          ? const Icon(
+                              Icons.south_west,
+                              color: Colors.green,
+                            )
+                          : const Icon(
+                              Icons.north_east,
+                              color: Colors.red,
+                            ),
                       DView.spaceWidth(),
                       Text(
                         AppFormats.date(history.date),
@@ -150,19 +151,12 @@ class _IncomeOutcomePageState extends State<IncomeOutcomePage> {
                             fontSize: 16),
                         textAlign: TextAlign.end,
                       )),
-                      PopupMenuButton<String>(
-                        itemBuilder: (context) => [
-                          const PopupMenuItem(
-                            child: Text("Update"),
-                            value: 'update',
-                          ),
-                          const PopupMenuItem(
-                            child: Text("Delete"),
-                            value: 'delete',
-                          ),
-                        ],
-                        onSelected: (value) => menuOption(value, history),
-                      )
+                      IconButton(
+                          onPressed: () => delete(history),
+                          icon: Icon(
+                            Icons.delete_forever,
+                            color: Colors.red,
+                          ))
                     ],
                   ),
                 ),

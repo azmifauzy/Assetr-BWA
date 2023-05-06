@@ -16,6 +16,7 @@ dependencies:
   d_info: ^0.0.7
   d_chart: ^2.2.11
   d_input: ^0.0.2
+  lottie: 2.2.0
   flutter:
     sdk: flutter
 

@@ -1,9 +1,13 @@
+import 'package:assetr/data/models/history.dart';
 import 'package:assetr/data/sources/source_history.dart';
 import 'package:get/get.dart';
 
 class HomeController extends GetxController {
   final _spentToday = 0.0.obs;
   double get spentToday => _spentToday.value;
+
+  final _spentYesterday = 0.0.obs;
+  double get spentYesterday => _spentYesterday.value;
 
   final _todayPercent = "0".obs;
   String get todayPercent => _todayPercent.value;
@@ -35,11 +39,18 @@ class HomeController extends GetxController {
   final _keysPastSevenDays = <String>[].obs;
   List<String> get keysPastSevenDays => _keysPastSevenDays.value;
 
+  final _todayDataId = 0.obs;
+  int get todayDataId => _todayDataId.value;
+
   getAnalytics(String userId) async {
     Map data = await SourceHistory.getHistory(userId);
 
     // Spent Today
     _spentToday.value = data["spent_today"].toDouble();
+    _spentYesterday.value = data["spent_yesterday"].toDouble();
+
+    // today data id
+    _todayDataId.value = data["today"]["id"];
 
     // Today Percentage
     double yesterday = data["spent_yesterday"].toDouble();
@@ -70,9 +81,6 @@ class HomeController extends GetxController {
         : isPlus
             ? 'Pemasukan\nlebih besar ${percentMonth.toStringAsFixed(1)}%\ndari Pengeluaran.'
             : 'Pemasukan\nlebih kecil ${percentMonth.toStringAsFixed(1)}%\ndari Pengeluaran.';
-
-    print(monthIncome);
-    print(monthOutcome);
 
     // Values Past Seven Days
     _valuesPastSevenDays.value = data["past_seven_days"]["values"]

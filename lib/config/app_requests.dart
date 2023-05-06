@@ -31,4 +31,34 @@ class AppRequests {
       return null;
     }
   }
+
+  static Future<Map?> puts(String url, Object? body,
+      {Map<String, String>? headers}) async {
+    try {
+      http.Response response =
+          await http.put(Uri.parse(url), headers: headers, body: body);
+      DMethod.printTitle('try - $url', response.body);
+
+      Map responseBody = jsonDecode(response.body);
+      return responseBody;
+    } catch (e) {
+      DMethod.printTitle('catch', e.toString());
+      return null;
+    }
+  }
+
+  static Future<Map?> deletes(String url, Object? body,
+      {Map<String, String>? headers}) async {
+    try {
+      http.Response response =
+          await http.delete(Uri.parse(url), headers: headers, body: body);
+      DMethod.printTitle('try - $url', response.body);
+
+      Map responseBody = jsonDecode(response.body);
+      return responseBody;
+    } catch (e) {
+      DMethod.printTitle('catch', e.toString());
+      return null;
+    }
+  }
 }

@@ -6,6 +6,8 @@ import 'package:assetr/presentation/controllers/HomeController.dart';
 import 'package:assetr/presentation/controllers/UserController.dart';
 import 'package:assetr/presentation/pages/auth/login_page.dart';
 import 'package:assetr/presentation/pages/history/add_history_page.dart';
+import 'package:assetr/presentation/pages/history/detail_history_page.dart';
+import 'package:assetr/presentation/pages/history/history_page.dart';
 import 'package:assetr/presentation/pages/history/income_outcome_page.dart';
 import 'package:d_chart/d_chart.dart';
 import 'package:d_view/d_view.dart';
@@ -13,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -88,13 +91,17 @@ class _HomePageState extends State<HomePage> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            "Pengeluaran Hari Ini",
-            style: Theme.of(context)
-                .textTheme
-                .headlineSmall!
-                .copyWith(fontWeight: FontWeight.bold),
-          ),
+          Obx(() {
+            return Text(
+              home.spentToday != 0
+                  ? "Pengeluaran Hari Ini"
+                  : "Pengeluaran Kemarin",
+              style: Theme.of(context)
+                  .textTheme
+                  .headlineSmall!
+                  .copyWith(fontWeight: FontWeight.bold),
+            );
+          }),
           DView.spaceHeight(),
           Material(
             borderRadius: BorderRadius.circular(12),
@@ -106,7 +113,10 @@ class _HomePageState extends State<HomePage> {
                 Padding(
                   padding: EdgeInsets.fromLTRB(16, 20, 16, 4),
                   child: Obx(() {
-                    return Text(AppFormats.currency(home.spentToday.toString()),
+                    return Text(
+                        AppFormats.currency(home.spentToday != 0
+                            ? home.spentToday.toString()
+                            : home.spentYesterday.toString()),
                         style: Theme.of(context)
                             .textTheme
                             .headlineMedium!
@@ -125,26 +135,34 @@ class _HomePageState extends State<HomePage> {
                     );
                   }),
                 ),
-                Container(
-                  margin: const EdgeInsets.fromLTRB(16, 0, 0, 16),
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  decoration: const BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(8),
-                          bottomLeft: Radius.circular(8))),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: const [
-                      Text(
-                        "Selengkapnya",
-                        style: TextStyle(color: AppColors.primaryColor),
-                      ),
-                      Icon(
-                        Icons.navigate_next,
-                        color: AppColors.primaryColor,
-                      )
-                    ],
+                GestureDetector(
+                  onTap: () {
+                    Get.to(() => DetailHistoryPage(
+                          userId: user.data.id.toString(),
+                          id: home.todayDataId.toString(),
+                        ));
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.fromLTRB(16, 0, 0, 16),
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    decoration: const BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(8),
+                            bottomLeft: Radius.circular(8))),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: const [
+                        Text(
+                          "Selengkapnya",
+                          style: TextStyle(color: AppColors.primaryColor),
+                        ),
+                        Icon(
+                          Icons.navigate_next,
+                          color: AppColors.primaryColor,
+                        )
+                      ],
+                    ),
                   ),
                 )
               ],
@@ -381,7 +399,9 @@ class _HomePageState extends State<HomePage> {
               trailing: const Icon(Icons.navigate_next),
             ),
             ListTile(
-              onTap: () {},
+              onTap: () {
+                Get.to(() => const HistoryPage());
+              },
               leading: const Icon(Icons.history),
               horizontalTitleGap: 0,
               title: const Text("Riwayat"),
