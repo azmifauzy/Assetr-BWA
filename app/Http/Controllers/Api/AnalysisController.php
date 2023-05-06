@@ -39,6 +39,7 @@ class AnalysisController extends Controller
                 'spentThisMonth' => $spentThisMonth,
                 'incomeThisMonth' => $incomeThisMonth,
             ],
+            'today' => History::where('user_id', $request->id)->whereDate('created_at', Carbon::today())->first() ?? History::where('user_id', $request->id)->orderBy('created_at', 'desc')->first(),
             'spent_today' => $spentToday,
             'spent_yesterday' => $spentYesterday,
             'past_seven_days' => [

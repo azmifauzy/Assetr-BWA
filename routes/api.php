@@ -30,5 +30,7 @@ Route::post("login", [UserController::class, 'login']);
 Route::post("analytics", [AnalysisController::class, 'analytics']);
 
 // HISTORIES
+Route::delete("history/{history}", [HistoryController::class, 'destroy']);
+Route::put("history/{history}", [HistoryController::class, 'update']);
 Route::post("history/show", [HistoryController::class, 'show']);
 Route::post("history", [HistoryController::class, 'store']);
